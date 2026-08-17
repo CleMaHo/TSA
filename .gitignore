@@ -3,3 +3,4 @@ instructions.md
 __pycache__/
 *.py[cod]
 .ipynb_checkpoints/
+.claude
