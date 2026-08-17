@@ -59,7 +59,8 @@ def plot_cost_matrix(cost: np.ndarray,
                      xlabel: str = "y index (j)",
                      ylabel: str = "x index (i)",
                      cbar_label: str = "accumulated cost",
-                     cmap: str = "viridis") -> None:
+                     cmap: str = "viridis",
+                     ax: "plt.Axes | None" = None) -> None:
     """Heatmap of a DP matrix with the optimal path drawn on top.
 
     Parameters
@@ -71,19 +72,28 @@ def plot_cost_matrix(cost: np.ndarray,
     title, xlabel, ylabel, cbar_label, cmap
         Cosmetic options; kept identical across notebooks 1-3 so the three
         heatmaps can be compared at a glance.
+    ax : matplotlib Axes, optional
+        Draw into an existing axes instead of creating a new figure.  Used by
+        notebook 05 to put several cost matrices side by side; the caller is
+        then responsible for ``plt.show()``.
     """
-    plt.figure(figsize=(6.5, 5.5))
-    plt.imshow(cost, origin="lower", aspect="auto", cmap=cmap, interpolation="nearest")
-    plt.colorbar(label=cbar_label)
+    standalone = ax is None
+    if standalone:
+        _, ax = plt.subplots(figsize=(6.5, 5.5))
+
+    im = ax.imshow(cost, origin="lower", aspect="auto", cmap=cmap, interpolation="nearest")
+    ax.figure.colorbar(im, ax=ax, label=cbar_label)
     if path is not None:
         path = np.asarray(list(path))
-        plt.plot(path[:, 1], path[:, 0], color="red", lw=1.5, label="optimal path")
-        plt.legend(loc="upper left")
-    plt.title(title)
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-    plt.tight_layout()
-    plt.show()
+        ax.plot(path[:, 1], path[:, 0], color="red", lw=1.5, label="optimal path")
+        ax.legend(loc="upper left")
+    ax.set_title(title)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+
+    if standalone:
+        ax.figure.tight_layout()
+        plt.show()
 
 
 def plot_alignment(x: np.ndarray, y: np.ndarray,
