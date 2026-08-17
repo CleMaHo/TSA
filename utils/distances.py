@@ -38,6 +38,27 @@ def dtw_cost_matrix(x: np.ndarray, y: np.ndarray, local_cost: str = "abs") -> np
     return D
 
 
+def dtw_path(D: np.ndarray) -> list[tuple[int, int]]:
+    """Back-track the optimal warping path from a DTW cost matrix.
+
+    Returns pairs ``(i, j)`` of 0-based *series* indices (padding border
+    removed), ordered from the start of both series to their end.
+    """
+    i, j = D.shape[0] - 1, D.shape[1] - 1
+    path = [(i - 1, j - 1)]
+    while i > 1 or j > 1:
+        # The border is `inf`, so the arg-min never walks off the matrix.
+        step = int(np.argmin([D[i - 1, j - 1], D[i - 1, j], D[i, j - 1]]))
+        if step == 0:
+            i, j = i - 1, j - 1
+        elif step == 1:
+            i -= 1
+        else:
+            j -= 1
+        path.append((i - 1, j - 1))
+    return path[::-1]
+
+
 def dtw_distance(x: np.ndarray, y: np.ndarray, local_cost: str = "abs") -> float:
     """DTW distance (square-rooted for the squared local cost)."""
     total = dtw_cost_matrix(x, y, local_cost)[-1, -1]
@@ -66,6 +87,28 @@ def edr_cost_matrix(x: np.ndarray, y: np.ndarray, eps: float) -> np.ndarray:
             sub = 0.0 if match[i - 1, j - 1] else 1.0
             D[i, j] = min(D[i - 1, j - 1] + sub, D[i - 1, j] + 1.0, D[i, j - 1] + 1.0)
     return D
+
+
+def edr_path(D: np.ndarray) -> list[tuple[int, int]]:
+    """Back-track one optimal edit path through an EDR cost matrix.
+
+    Deletions and insertions also appear as pairs (the index that did *not*
+    advance is simply repeated).  "One" optimal path, not "the": the EDR matrix
+    is integer-valued, so ties are common and the arg-min below breaks them in a
+    fixed order (match, then delete, then insert).
+    """
+    i, j = D.shape[0] - 1, D.shape[1] - 1
+    path = []
+    while i > 0 and j > 0:
+        path.append((i - 1, j - 1))
+        step = int(np.argmin([D[i - 1, j - 1], D[i - 1, j], D[i, j - 1]]))
+        if step == 0:
+            i, j = i - 1, j - 1
+        elif step == 1:
+            i -= 1
+        else:
+            j -= 1
+    return path[::-1]
 
 
 def edr_distance(x: np.ndarray, y: np.ndarray, eps: float) -> float:
@@ -98,6 +141,22 @@ def erp_cost_matrix(x: np.ndarray, y: np.ndarray, g: float = 0.0) -> np.ndarray:
                           D[i - 1, j] + gap_x[i - 1],
                           D[i, j - 1] + gap_y[j - 1])
     return D
+
+
+def erp_path(D: np.ndarray) -> list[tuple[int, int]]:
+    """Back-track one optimal alignment path through an ERP cost matrix."""
+    i, j = D.shape[0] - 1, D.shape[1] - 1
+    path = []
+    while i > 0 and j > 0:
+        path.append((i - 1, j - 1))
+        step = int(np.argmin([D[i - 1, j - 1], D[i - 1, j], D[i, j - 1]]))
+        if step == 0:
+            i, j = i - 1, j - 1
+        elif step == 1:
+            i -= 1
+        else:
+            j -= 1
+    return path[::-1]
 
 
 def erp_distance(x: np.ndarray, y: np.ndarray, g: float = 0.0) -> float:
