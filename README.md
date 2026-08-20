@@ -36,15 +36,4 @@ copy them. All notebooks load the identical dataset from `data/synthetic.py`
 phase-shifted, reversed, and one unrelated negative control), so the four rankings are
 directly comparable.
 
-## Running
 
-```bash
-python -m venv .venv
-.venv/Scripts/activate          # Windows;  source .venv/bin/activate elsewhere
-pip install -r requirements.txt
-jupyter lab                     # or open the notebooks in VS Code
-```
-
-Notebooks are meant to be run top to bottom in order. They add the project root to
-`sys.path` themselves, so `from data.synthetic import generate_dataset` works from
-inside `notebooks/`.
