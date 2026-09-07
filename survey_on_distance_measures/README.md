@@ -166,3 +166,107 @@ Als grobe Entscheidungshilfe, in der Reihenfolge, wie man typischerweise vorgeht
 7. Sehr große Datenmengen, wiederkehrende Aufgabe, genug Trainingsdaten vorhanden, einfachere Verfahren zu langsam/ungenau? → Embedding-Ansätze (TS2Vec, Autoencoder).
 
 Wichtig laut Survey: Es gibt kein Maß, das in allen Studien durchgehend am besten abschneidet. Elastische Maße schlagen nicht automatisch Sliding-Maße, und Lock-Step-Maße (richtig normalisiert) sind manchmal überraschend konkurrenzfähig. In der Praxis lohnt es sich daher, mindestens zwei Kandidaten aus unterschiedlichen Kategorien empirisch auf den eigenen Daten zu vergleichen, statt sich auf eine "Standardannahme" zu verlassen.
+
+## Anhang: Vollständige Methodenliste
+
+Die folgenden Tabellen listen alle in der Survey benannten Einzelmethoden auf (nicht nur die im Haupttext erklärten Vertreter), gruppiert wie in der Survey selbst. Formeln sind hier bewusst weggelassen (Details siehe Originalarbeit, Tabellen 1–10) – stattdessen eine kurze Einordnung, was das jeweilige Maß tut bzw. wodurch es sich von den anderen in seiner Unterkategorie unterscheidet.
+
+### A1. Lock-Step-Maße (Tabellen 1–3 der Survey, ~40 Methoden in 9 Unterkategorien)
+
+**Minkowski:** Euclidean, Manhattan, Minkowski (allgemeine p-Norm), Chebyshev (Maximalabweichung, p→∞).
+
+**L1 (angepasste Manhattan-Varianten):** Sørensen (normiert auf [0,1]), Gower (normiert über Reihenlänge), Soergel (normiert über Maximalwerte), Kulczynski (normiert über Minimalwerte), Canberra (sensitiv nahe Null, gut für Daten um den Ursprung), Lorentzian (Log-gedämpfte L1-Variante, robust gegen Ausreißer).
+
+**Intersection (eng verwandt mit L1, über Schnittmengen-Logik):** Intersection, Wave Hedges, Czekanowski (äquivalent zu Sørensen), Motyka, Tanimoto (äquivalent zu Soergel).
+
+**Inner Product (basieren auf Skalarprodukt/Winkel zwischen den Reihen):** Inner Product, Harmonic Mean, Kumar-Hassebrook (ähnlich Harmonic Mean, für Bildsensor-Mustervergleich), Jaccard, Cosine (Winkel zwischen den Vektoren; hängt mit Pearson-Korrelation zusammen), Dice.
+
+**Squared Chord (Summe geometrischer Mittel):** Fidelity, Bhattacharyya (Spezialfall der Mahalanobis-Distanz), Squared-chord, Hellinger, Matusita – häufig in der biologischen Datenanalyse (z. B. Pollenanalyse) eingesetzt.
+
+**Squared L2 (χ²-Familie, quadrierte euklidische Distanz mit Normierung):** Squared Euclidean, Clark, Neyman χ², Pearson χ² (beide asymmetrisch/Divergenzen), Squared χ², Divergence, Additive Symmetric χ², Probabilistic Symmetric χ² (symmetrische Versionen).
+
+**Shannon's Entropy (basieren auf Informationstheorie):** Kullback-Leibler (KL-Divergenz, asymmetrisch), Jeffreys (symmetrische Version von KL), K Divergence, Topsøe, Jensen Shannon, Jensen Difference.
+
+**Vicissitude (Varianten von Wave Hedges mit unterschiedlicher Normierung):** Vicis-Wave Hedges (= Emanon 1), Emanon 2, Emanon 3, Emanon 4, Max-Symmetric χ², Min-Symmetric χ².
+
+**Kombinationsmaße:** Taneja (arithmetisch-geometrisches Mittel-Divergenzmaß), Kumar-Johnson, Avg(L1, L∞) (Mittel aus Manhattan und Chebyshev).
+
+**Sonstige (keine klassischen Lock-Step-Maße im engeren Sinn, aber verwandt):** DISSIM (Integral der euklidischen Distanz über die Zeit, erlaubt unterschiedliche Abtastraten), PCC (Pearson-Korrelationskoeffizient), ACD (Autocorrelation Distance, vergleicht Autokorrelationsvektoren), MD (Markovian Distance, vergleicht Übergangswahrscheinlichkeiten eines Markov-Modells).
+
+### A2. Elastische Maße (Abschnitt 5 der Survey)
+
+**DTW-Familie:** DTW (Standard), Constrained DTW / Sakoe-Chiba-Band (begrenztes Warping-Fenster), Weighted DTW (gewichtete Bestrafung je nach zeitlichem Abstand), Derivative DTW (vergleicht Ableitungen statt Rohwerte).
+
+**Threshold-basiert (Schwellenwert ε entscheidet Match/Mismatch):** LCSS (Longest Common Subsequence), EDR (Edit Distance on Real Sequences), SWALE (Sequence Weighted Alignment, verallgemeinert EDR mit Belohnungs-/Straf-Parametern r/p).
+
+**Metrisch (erfüllen die Dreiecksungleichung, dadurch indexierbar):** ERP (Edit Distance with Real Penalty), MSM (Move-Split-Merge, translationsinvariant), TWED (Time Warp Edit Distance, bestraft zusätzlich zeitlichen Abstand).
+
+**Beschleunigung:** Early Abandoning (Berechnung abbrechen, sobald Zwischenergebnis den bisher besten Kandidaten übersteigt), Lower Bounding (LB_Kim, LB_Keogh, LB_Improved, LB_Enhanced, LB_Petitjean/LB_Webb, GLB-Framework als vereinheitlichter Ansatz für alle elastischen Maße inkl. EDR/SWALE).
+
+### A3. Sliding-Maße (Tabelle 6 der Survey)
+
+NCC_b (biased normalized cross-correlation), NCC_u (unbiased), NCC_c (Basis für SBD, am besten performant laut Survey), NCC (unnormierte Variante), STID (Scaling and Translation Invariant Distance, sucht zusätzlich optimalen Skalierungsfaktor α).
+
+### A4. Kernel-Maße (Tabelle 7 der Survey)
+
+RBF (Radial Basis Function, Gaussian-Kernel über euklidischer Distanz), LGAK (Log Global Alignment Kernel, betrachtet alle Alignments statt nur des optimalen), KDTW (Kernel Dynamic Time Warping, DTW mit positiv-definitem Kernel statt Min/Max-Operationen), SINK (Shift Invariant Kernel, gewichtete Summe über die normierte Kreuzkorrelationssequenz).
+
+### A5. Feature-basierte Maße (Tabelle 8 der Survey, 19 Methoden)
+
+| Methode | Feature-Typ | Dim. |
+|---|---|---|
+| TSS-IOF-ED | First-/Second-Order-Statistiken | univariat |
+| TSC-GC-ED | Globale Merkmale | univariat |
+| CBC (Characteristic-Based Clustering) | Umfassend (Trend, Saisonalität, Chaos, Selbstähnlichkeit u.a.) | multivariat |
+| TSC-SSF | Statistisch | multivariat |
+| TSBF | Statistisch | univariat |
+| FEDD | Statistisch | univariat |
+| FBC | Fuzzy-Merkmale | univariat |
+| hctsa | Umfassend (~4.800–7.700 Merkmale) | univariat |
+| tsfresh | Umfassend (~800 Merkmale, automatisierte Relevanzfilterung) | multivariat |
+| catch22 | Kanonisch (22 destillierte Merkmale aus hctsa) | multivariat |
+| TSC-CN | Visibility-Graph-basiert | multivariat |
+| FeatTS | Basiert auf tsfresh | univariat |
+| TSC-GPF-ED | Global + Peak-Merkmale | univariat |
+| TSC-FDDO | Umfassend | multivariat |
+| Time2Feat | Umfassend, interpretierbare Repräsentationen | multivariat |
+| theft | Umfassend | univariat |
+| AngClust | Winkel-Merkmale (aus PCA) | multivariat |
+| FGHIC-SOME | Statistisch | multivariat |
+| TSC-VF | Visuelle Merkmale | univariat |
+| FTSCP | Umfassend | multivariat |
+
+### A6. Modellbasierte Maße (Tabelle 9 der Survey)
+
+| Methode | Modell | Distanzmaß | Dim. |
+|---|---|---|---|
+| TSC-ARIMA-ED | ARIMA | Euklidisch (auf Modellkoeffizienten) | univariat |
+| TSC-D-HMM | HMM | Log-Likelihood | multivariat |
+| ICL | GMM | Log-Likelihood | multivariat |
+| TSC-AR-HT | AR | Hypothesentest | univariat |
+| MBCD | Markov-Kette | KL-Distanz | multivariat |
+| TSC-LPC-ARIMA | ARIMA | Euklidisch | multivariat |
+| BHMMC | HMM | BIC | multivariat |
+| FCM-SV | GMM | Log-Likelihood (Fuzzy-C-Means-Score) | univariat |
+| HMM-TWM | HMM | Euklidisch | univariat |
+| TSC-ARMAM | ARMA | Log-Likelihood | univariat |
+| CLUSTSEG | Regressions-Mischmodell | L2-Distanz | univariat |
+| LMAR / LMMAR | LMAR/LMMAR | Mahalanobis-Distanz | univariat |
+| TSC-HMM-S-KL | HMM | Symmetrische KL-Divergenz | multivariat |
+| MV-ARF | AR-Ensembles | MSE | multivariat |
+| K-MODELS | ARMA/ARIMA | K-Models-Loss | univariat |
+
+### A7. Embedding-basierte Maße (Tabelle 10 der Survey)
+
+| Methode | Embedding-Prinzip | Dim. |
+|---|---|---|
+| GRAIL | SINK-Kernel-Ähnlichkeit + spektrale Zerlegung, mit Landmarken-Auswahl | univariat |
+| RWS (Random Warping Series) | Approximiert GAK über zufällig gezogene Referenzreihen | univariat |
+| SPIRAL | Approximiert die DTW-Distanzmatrix über Sampling + Faktorisierung | univariat |
+| SIDL (Shift-invariant Dictionary Learning) | Lernt ein Dictionary shift-invarianter Muster + Sparse Coding | univariat |
+| Autoencoder | Generisches neuronales Netz (Encoder/Decoder) | univariat |
+| Time2Vec | Einzelne lernbare Schicht mit periodischer Aktivierung | univariat |
+| TS2Vec | Dilatierte CNNs + hierarchisches kontrastives Lernen | multivariat |
+| LLM Encoding | Multimodales LLM-basiertes Embedding | multivariat |
+
+Zusätzlich diskutiert die Survey allgemein Deep-Learning-Backbones für Embeddings: LSTMs (klassisch für sequenzielle Daten), bidirektionale LSTMs, 1D-CNNs sowie multimodale Ansätze, die Zeitreihen mit Text/Bild-Daten kombinieren.
